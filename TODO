@@ -1,0 +1,2 @@
+- add WaterSensor event capability for tank full (or Valve?)
+- add Consumable event capability for filter change, if available
