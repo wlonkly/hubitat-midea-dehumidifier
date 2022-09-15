@@ -31,6 +31,7 @@ metadata
         attribute "Mode", "string"
         attribute "TargetHumidity", "number"
         attribute "FanSpeed", "string"
+        attribute "TankLevel", "number"
     }
 }
 
@@ -374,6 +375,8 @@ def _updateAttributes(resp)
     events +=    [name: "Mode",      value: translateMode( resp.Mode, "integer" ), isStateChange: true ]
     events +=    [name: "humidity",  value: resp.humidity, unit: "%", isStateChange: true]
     events +=    [name: "TargetHumidity", value: resp.TargetHumidity, isStateChange: true]
+    events +=    [name: "TankLevel", value: resp.TankLevel, isStateChange: true]
+
     events.each
     {
         if( it.value != device.currentValue( it.name ) )
@@ -441,7 +444,8 @@ def appliance_response(data)
     resp += [Mode:            data[2]&0b00001111 ]//1set, 2, cont, 3, max
     resp += [humidity:        data[16]           ]
     resp += [TargetHumidity:  data[7]            ]
-    resp += [FanSpeed:        data[3]&0b01111111 ]          
+    resp += [FanSpeed:        data[3]&0b01111111 ]   
+    resp += [TankLevel:       data[10]&0b01111111]
     
     return resp
 }
