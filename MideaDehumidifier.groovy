@@ -34,6 +34,7 @@ metadata
         attribute "TargetHumidity", "number"
         attribute "FanSpeed", "string"
         attribute "TankLevel", "number"
+        attribute "FilterAlert", "enum", ["true","false"]
     }
 }
 
@@ -378,6 +379,8 @@ def _updateAttributes(resp)
     events +=    [name: "humidity",  value: resp.humidity, unit: "%", isStateChange: true]
     events +=    [name: "TargetHumidity", value: resp.TargetHumidity, isStateChange: true]
     events +=    [name: "TankLevel", value: resp.TankLevel, isStateChange: true]
+    events +=    [name: "FilterAlert", value: resp.FilterAlert, isStateChange: true]
+
 
     events.each
     {
@@ -441,13 +444,16 @@ def appliance_response(data)
     // The response data from the appliance includes a packet header which we don't want
     data = subBytes(data, 0xA, data.size() - 0xA)
 
+    filterAlert = (data[9] & 0b10000000) ? "true" : "false"
+        
     def resp = [:]
-    resp += [switch:          (data[1]&0x1) !=0  ]
-    resp += [Mode:            data[2]&0b00001111 ]//1set, 2, cont, 3, max
-    resp += [humidity:        data[16]           ]
-    resp += [TargetHumidity:  data[7]            ]
-    resp += [FanSpeed:        data[3]&0b01111111 ]
-    resp += [TankLevel:       data[10]&0b01111111]
+    resp += [switch:          (data[1] & 0x1) != 0 ]
+    resp += [Mode:            data[2] & 0b00001111 ]//1set, 2, cont, 3, max
+    resp += [humidity:        data[16]             ]
+    resp += [TargetHumidity:  data[7]              ]
+    resp += [FanSpeed:        data[3] & 0b01111111 ]
+    resp += [TankLevel:       data[10] & 0b01111111]
+    resp += [FilterAlert:     filterAlert          ]
 
     return resp
 }
